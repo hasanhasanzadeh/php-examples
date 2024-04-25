@@ -2,20 +2,21 @@
 $users=[
     [
         'email'=>'samih@gmail.com',
-        'password'=>'123456',
+        'password'=>password_hash('123', PASSWORD_DEFAULT),
         'jwt'=>''
     ],
     [
         'email'=>'payman@gmail.com',
-        'password'=>'12345678',
+        'password'=>password_hash('123', PASSWORD_DEFAULT),
         'jwt'=>''
     ],
     [
         'email'=>'ali@gmail.com',
-        'password'=>'112233',
+        'password'=>password_hash('123', PASSWORD_DEFAULT),
         'jwt'=>''
     ],
 ];
+
 
 function responseToJson($array)
 {
@@ -41,11 +42,14 @@ function decryptJwt($string): string
 function Login($email,$password){
     global $users;
     foreach($users as $user){
-        if($user['email']==$email && $user['password']==$password){
+        if($user['email']==$email && password_verify($password,$user['password'])){
             $user['jwt']=encryptJwt($user['email']);
           return responseToJson([
                 'msg'=>'Login success',
-                'data'=>$user,
+                'data'=>[
+                    'email'=>$user['email'],
+                    'jwt'=>$user['jwt']
+                ],
                 'status'=>200,
             ]);
         }
@@ -63,9 +67,13 @@ function getProfile($jwt)
 
     foreach($users as $user){
         if($user['email']==decryptJwt($jwt)){
+            $user['jwt']=encryptJwt($user['email']);
             return responseToJson( [
                 'msg'=>'get profile success',
-                'data'=>$user,
+                'data'=>[
+                    'email'=>$user['email'],
+                    'jwt'=>$user['jwt']
+                ],
                 'status'=>200,
             ]);
         }
